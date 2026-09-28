@@ -70,12 +70,13 @@ sync cannot quietly hand it back.
 
 ## You deploy this
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/REPLACE-WITH-THE-PUBLIC-REPO)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sv-priv/stamp-for-ambassadors)
 
-Fork first, then use that button. It reads [`render.yaml`](render.yaml)
-and creates the web service and the database. Replace
-`REPLACE-WITH-THE-PUBLIC-REPO` with this repository's address once it is
-public. Use **Starter**, not the free plan. A sleeping instance at the
+Fork first. The button deploys the repository in its link, so in your
+fork point it at the fork, or use **New > Blueprint** in the Render
+dashboard and pick the fork. Either way it reads
+[`render.yaml`](render.yaml) and creates the web service and the
+database. Use **Starter**, not the free plan. A sleeping instance at the
 door is a queue.
 
 Edit `region` in [`render.yaml`](render.yaml) on both the service and

@@ -29,6 +29,12 @@ Without `RESEND_API_KEY`, sign-in links print in the `next dev` terminal.
 Production will not take that branch. It throws. Each fork owns its
 own Resend account; see Mail in the [README](../README.md).
 
+`npm run db:migrate` applies the migrations in `prisma/migrations`. To
+write a new one, run `npx prisma migrate dev --create-only` and edit the
+SQL it proposes. It also offers to drop `Event.ownerHostId` and to swap
+the `_EventToHost` index for a primary key. Take both out: the column
+stays until its own release.
+
 With `npm run db:start`, `SHADOW_DATABASE_URL` must be on its own port,
 the next one up from `DATABASE_URL`. On the same port, `prisma migrate dev`
 fails with P3005 every time. On your own Postgres, a second database on the
@@ -87,9 +93,13 @@ npm run test:all
 npm run stress    # concurrency, against the dev server on port 3002
 ```
 
-`npm run test:e2e` creates `ambassadors_test` on the same Postgres as
-`DATABASE_URL`, starts a fake Luma on port 3199, and the app on port
-3100. It does not touch the database `npm run dev` is using.
+`npm run test:e2e` starts a fake Luma on port 3199 and the app on port
+3100, and empties its own database before every run. On your own
+Postgres that is `ambassadors_test`, created next to `DATABASE_URL`.
+`npm run db:start` cannot hold a second database: every name opens the
+same one. Run `npm run db:test:start` once and put the URL it prints in
+`.env` as `TEST_DATABASE_URL`. The suite refuses to start if its database
+turns out to be the one `npm run dev` uses.
 
 ## Screenshots and walkthrough
 

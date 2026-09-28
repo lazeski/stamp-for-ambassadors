@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3002",
+    "postinstall": "prisma generate",
     "build": "prisma generate && next build",
     "start": "next start -p ${PORT:-3002}",
     "release": "prisma migrate deploy && prisma db seed",
@@ -18,7 +19,9 @@
     "test:all": "vitest run && playwright test",
     "db:start": "prisma dev --detach --name stamp-ambassadors",
     "db:stop": "prisma dev stop stamp-ambassadors",
-    "db:migrate": "prisma migrate dev",
+    "db:test:start": "prisma dev --detach --name stamp-ambassadors-test",
+    "db:test:stop": "prisma dev stop stamp-ambassadors-test",
+    "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
