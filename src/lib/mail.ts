@@ -212,21 +212,15 @@ export async function sendCreditsReadyEmail(input: {
   eventName: string;
   codeCount: number;
 }) {
-  const noun = input.codeCount === 1 ? "credit is" : "credits are";
   await send({
     email: input.email,
     subject: `Your ${input.eventName} credits are ready`,
     logLabel: "Credits ready",
     cta: "See your credits",
     lines: [
-      `You're checked in at ${input.eventName}.`,
-      "",
-      `Your ${input.codeCount} partner ${noun} waiting.`,
-      "Open this link to see them. No sign-in needed, it already knows it's you.",
+      "Your credits are waiting. Open this link to see them. No sign-in needed, it already knows it's you.",
       "",
       input.url,
-      "",
-      "Now go build something.",
     ],
   });
 }
