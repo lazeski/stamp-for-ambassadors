@@ -601,7 +601,10 @@ export async function removeUnclaimed(
   return { ok: `Removed ${deleted.count} leftover ${deleted.count === 1 ? "code" : "codes"}.` };
 }
 
-/** Removes a partner added for this night, and its unused codes. */
+/**
+ * Removes a partner and every code attached to it, including one a guest
+ * already claimed. Cursor stays, because that pool is the night's real inventory.
+ */
 export async function deletePartner(
   _prev: ActionResult,
   formData: FormData,
@@ -615,13 +618,6 @@ export async function deletePartner(
   if (!sponsor) return { error: "Unknown partner." };
   if (sponsor.slug === "cursor") {
     return { error: "Cursor stays in the catalog. Remove its unused codes instead." };
-  }
-
-  const claimed = await db.code.count({
-    where: { sponsorId: sponsor.id, claimedByAttendeeId: { not: null } },
-  });
-  if (claimed > 0) {
-    return { error: "Someone already claimed a code from this partner, so it stays." };
   }
 
   await db.sponsor.delete({ where: { id: sponsor.id } });
