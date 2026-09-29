@@ -285,7 +285,7 @@ export function CodePool({
                 <p className="shrink-0 text-[11px] text-mute">
                   {[claim.name, claim.when ? `scanned ${claim.when}` : null]
                     .filter(Boolean)
-                    .join(" \u00b7 ")}
+                    .join(" · ")}
                 </p>
               </li>
             ))}
