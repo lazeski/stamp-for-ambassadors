@@ -6,6 +6,7 @@ import {
 } from "@/app/admin/host-forms";
 import {
   CodePool,
+  DeletePartnerButton,
   LeftoverForm,
   GuideForm,
   UploadForm,
@@ -205,6 +206,20 @@ export default async function AdminEventPage({
               eventSlug={event.slug}
               sponsors={sponsors.map((s) => ({ slug: s.slug, name: s.name }))}
             />
+            {sponsors
+              .filter((sponsor) => sponsor.slug !== "cursor")
+              .map((sponsor) => (
+                <section key={sponsor.slug} className="border-t border-line py-8">
+                  <h2 className="font-display text-2xl tracking-heading">
+                    {sponsor.name}
+                  </h2>
+                  <p className="mt-2 text-sm text-mute">No codes on this event.</p>
+                  <DeletePartnerButton
+                    eventSlug={event.slug}
+                    sponsorSlug={sponsor.slug}
+                  />
+                </section>
+              ))}
           </>
         ) : (
           <>
@@ -220,8 +235,32 @@ export default async function AdminEventPage({
                   </p>
                 </div>
                 <CodePool eventSlug={event.slug} pool={sponsor} />
+                {sponsor.slug === "cursor" ? null : (
+                  <DeletePartnerButton
+                    eventSlug={event.slug}
+                    sponsorSlug={sponsor.slug}
+                  />
+                )}
               </section>
             ))}
+            {sponsors
+              .filter(
+                (sponsor) =>
+                  sponsor.slug !== "cursor" &&
+                  !pooled.some((row) => row.slug === sponsor.slug),
+              )
+              .map((sponsor) => (
+                <section key={sponsor.slug} className="border-t border-line py-8">
+                  <h2 className="font-display text-2xl tracking-heading">
+                    {sponsor.name}
+                  </h2>
+                  <p className="mt-2 text-sm text-mute">No codes on this event.</p>
+                  <DeletePartnerButton
+                    eventSlug={event.slug}
+                    sponsorSlug={sponsor.slug}
+                  />
+                </section>
+              ))}
             <Fold
               title="Add codes"
               summary="CSV"

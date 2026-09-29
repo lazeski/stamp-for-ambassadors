@@ -13,6 +13,7 @@ export type AuditAction =
   | "event.hosts"
   | "codes.import"
   | "codes.reassign"
+  | "partner.delete"
   | "howto.save"
   | "voting.open"
   | "voting.close"

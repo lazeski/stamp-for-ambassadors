@@ -5,6 +5,7 @@ import {
   importCodes,
   saveGuide,
   reassignLeftovers,
+  deletePartner,
   removeCode,
   removeUnclaimed,
   type ActionResult,
@@ -143,6 +144,30 @@ export type PoolRow = {
     when: string | null;
   }[];
 };
+
+export function DeletePartnerButton({
+  eventSlug,
+  sponsorSlug,
+}: {
+  eventSlug: string;
+  sponsorSlug: string;
+}) {
+  const [state, action, pending] = useActionState<ActionResult, FormData>(
+    deletePartner,
+    undefined,
+  );
+
+  return (
+    <form action={action} className="mt-4">
+      <input type="hidden" name="eventSlug" value={eventSlug} />
+      <input type="hidden" name="sponsorSlug" value={sponsorSlug} />
+      <Result state={state} />
+      <Button type="submit" variant="danger" size="sm" disabled={pending}>
+        {pending ? "Deleting…" : "Delete partner"}
+      </Button>
+    </form>
+  );
+}
 
 export function CodePool({
   eventSlug,

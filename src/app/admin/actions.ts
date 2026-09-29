@@ -601,6 +601,41 @@ export async function removeUnclaimed(
   return { ok: `Removed ${deleted.count} leftover ${deleted.count === 1 ? "code" : "codes"}.` };
 }
 
+/** Removes a partner added for this night, and its unused codes. */
+export async function deletePartner(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const eventSlug = String(formData.get("eventSlug") ?? "");
+  const { organizer, event } = await requireEventManager(eventSlug);
+  const sponsorSlug = String(formData.get("sponsorSlug") ?? "");
+  const sponsor = await db.sponsor.findFirst({
+    where: { slug: sponsorSlug, ...partnersFor(event.id) },
+  });
+  if (!sponsor) return { error: "Unknown partner." };
+  if (sponsor.slug === "cursor") {
+    return { error: "Cursor stays in the catalog. Remove its unused codes instead." };
+  }
+
+  const claimed = await db.code.count({
+    where: { sponsorId: sponsor.id, claimedByAttendeeId: { not: null } },
+  });
+  if (claimed > 0) {
+    return { error: "Someone already claimed a code from this partner, so it stays." };
+  }
+
+  await db.sponsor.delete({ where: { id: sponsor.id } });
+  await audit({
+    actorEmail: organizer.email,
+    action: "partner.delete",
+    eventSlug: event.slug,
+    detail: sponsor.name,
+  });
+  revalidateInventory(event.slug);
+  revalidatePath("/admin");
+  return { ok: `${sponsor.name} removed.` };
+}
+
 const projectSchema = z.object({
   name: z.string().trim().min(1, "Give the project a name.").max(120),
   builders: z.string().trim().min(1, "Say who built it.").max(200),
