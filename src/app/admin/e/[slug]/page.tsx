@@ -7,6 +7,7 @@ import {
 import {
   CodePool,
   DeletePartnerButton,
+  EditPartnerForm,
   LeftoverForm,
   GuideForm,
   UploadForm,
@@ -46,9 +47,11 @@ export default async function AdminEventPage({
     db.sponsor.findMany({
       where: partnersFor(event.id),
       orderBy: { sortOrder: "asc" },
-      select: {
+        select: {
         slug: true,
         name: true,
+        perk: true,
+        instructions: true,
         codes: {
           where: { eventId: event.id },
           select: {
@@ -214,6 +217,9 @@ export default async function AdminEventPage({
                     {sponsor.name}
                   </h2>
                   <p className="mt-2 text-sm text-mute">No codes on this event.</p>
+                  <Fold title="Edit" summary="Name and steps">
+                    <EditPartnerForm eventSlug={event.slug} sponsor={sponsor} />
+                  </Fold>
                   <DeletePartnerButton
                     eventSlug={event.slug}
                     sponsorSlug={sponsor.slug}
@@ -223,26 +229,34 @@ export default async function AdminEventPage({
           </>
         ) : (
           <>
-            {pooled.map((sponsor) => (
-              <section key={sponsor.slug} className="border-t border-line py-8">
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h2 className="font-display text-2xl tracking-heading">
-                    {sponsor.name}
-                  </h2>
-                  <p className="font-mono text-[11px] tracking-wide text-mute">
-                    {sponsor.claims.length} claimed · {sponsor.leftover.length}{" "}
-                    left · {sponsor.claims.length + sponsor.leftover.length} total
-                  </p>
-                </div>
-                <CodePool eventSlug={event.slug} pool={sponsor} />
-                {sponsor.slug === "cursor" ? null : (
-                  <DeletePartnerButton
-                    eventSlug={event.slug}
-                    sponsorSlug={sponsor.slug}
-                  />
-                )}
-              </section>
-            ))}
+            {pooled.map((pool) => {
+              const source = sponsors.find((row) => row.slug === pool.slug);
+              return (
+                <section key={pool.slug} className="border-t border-line py-8">
+                  <div className="flex flex-wrap items-baseline justify-between gap-4">
+                    <h2 className="font-display text-2xl tracking-heading">
+                      {pool.name}
+                    </h2>
+                    <p className="font-mono text-[11px] tracking-wide text-mute">
+                      {pool.claims.length} claimed · {pool.leftover.length}{" "}
+                      left · {pool.claims.length + pool.leftover.length} total
+                    </p>
+                  </div>
+                  <CodePool eventSlug={event.slug} pool={pool} />
+                  {pool.slug === "cursor" || !source ? null : (
+                    <>
+                      <Fold title="Edit" summary="Name and steps">
+                        <EditPartnerForm eventSlug={event.slug} sponsor={source} />
+                      </Fold>
+                      <DeletePartnerButton
+                        eventSlug={event.slug}
+                        sponsorSlug={pool.slug}
+                      />
+                    </>
+                  )}
+                </section>
+              );
+            })}
             {sponsors
               .filter(
                 (sponsor) =>
@@ -255,6 +269,9 @@ export default async function AdminEventPage({
                     {sponsor.name}
                   </h2>
                   <p className="mt-2 text-sm text-mute">No codes on this event.</p>
+                  <Fold title="Edit" summary="Name and steps">
+                    <EditPartnerForm eventSlug={event.slug} sponsor={sponsor} />
+                  </Fold>
                   <DeletePartnerButton
                     eventSlug={event.slug}
                     sponsorSlug={sponsor.slug}

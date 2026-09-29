@@ -62,6 +62,52 @@ export function GuideForm({ eventSlug }: { eventSlug: string }) {
   );
 }
 
+export function EditPartnerForm({
+  eventSlug,
+  sponsor,
+}: {
+  eventSlug: string;
+  sponsor: {
+    slug: string;
+    name: string;
+    perk: string | null;
+    instructions: string | null;
+  };
+}) {
+  const [state, formAction, pending] = useActionState<ActionResult, FormData>(
+    saveGuide,
+    undefined,
+  );
+
+  return (
+    <form action={formAction} className="mt-6 flex max-w-md flex-col gap-5">
+      <input type="hidden" name="eventSlug" value={eventSlug} />
+      <input type="hidden" name="sponsorSlug" value={sponsor.slug} />
+      <Field label="Partner name">
+        <Input name="name" required defaultValue={sponsor.name} autoComplete="off" />
+      </Field>
+      <Field label="Perk" hint="Optional. Leave it blank if the amount should not be written down.">
+        <Input name="perk" defaultValue={sponsor.perk ?? ""} autoComplete="off" />
+      </Field>
+      <Field
+        label="Steps"
+        hint="One step per line. A URL on its own line becomes the open link."
+      >
+        <Textarea
+          name="instructions"
+          rows={4}
+          required
+          defaultValue={sponsor.instructions ?? ""}
+        />
+      </Field>
+      <Result state={state} />
+      <Button type="submit" variant="primary" disabled={pending}>
+        {pending ? "Saving…" : "Save changes"}
+      </Button>
+    </form>
+  );
+}
+
 export function UploadForm({
   eventSlug,
   sponsors,
@@ -239,7 +285,7 @@ export function CodePool({
                 <p className="shrink-0 text-[11px] text-mute">
                   {[claim.name, claim.when ? `scanned ${claim.when}` : null]
                     .filter(Boolean)
-                    .join(" · ")}
+                    .join(" \u00b7 ")}
                 </p>
               </li>
             ))}
