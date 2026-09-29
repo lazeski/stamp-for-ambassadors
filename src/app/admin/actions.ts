@@ -207,7 +207,7 @@ export async function refreshEventFromLuma(
     const roster = await syncRosterNow(event);
     if (roster.error) {
       return {
-        ok: "Details refreshed. Guest list could not be updated \u2014 try again in a moment.",
+        ok: "Details refreshed. Guest list could not be updated — try again in a moment.",
       };
     }
     return { ok: "Event details and guest list refreshed from Luma." };
@@ -588,7 +588,7 @@ export async function importCodes(
   return { imported: result.count };
 }
 
-/** Drops one leftover. Claimed rows stay \u2014 that code already left the room. */
+/** Drops one leftover. Claimed rows stay — that code already left the room. */
 export async function removeCode(
   _prev: ActionResult,
   formData: FormData,
@@ -744,7 +744,7 @@ export async function removeProject(
  * Reopening restarts `votingOpenedAt` rather than keeping the first one. That
  * timestamp is what `votingState` measures its own auto-close from, so a host
  * clearing an accidental close an hour later would otherwise be handed a
- * ballot with an hour already run off it \u2014 and reopening the morning after
+ * ballot with an hour already run off it — and reopening the morning after
  * would shut again on the same press.
  */
 export async function setVoting(
