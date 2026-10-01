@@ -340,24 +340,19 @@ export default async function AdminEventPage({
             {average ? `${average} average.` : "Ask how the night went."}
           </h2>
           <p className="mt-3 text-sm leading-6 text-mute">
-            One score from 1 to 5, and an optional note. It emails people who{" "}
+            One score from 1 to 5, and a note. The email goes to people who{" "}
             {event.perksRequireCheckIn
               ? "were scanned in"
               : "have an approved registration"}{" "}
-            and have not been asked yet. The link works for two weeks.
+            and do not have the link yet. The link works for two weeks.
           </p>
-          <p className="mt-4 font-mono text-[11px] tracking-wide text-mute">
-            {audience} can answer · {asked} asked · {replies.length}{" "}
-            {replies.length === 1 ? "reply" : "replies"}
+          <p className="mt-4 text-sm leading-6 text-mute">
+            {replies.length === 0
+              ? `No replies yet. ${asked} ${asked === 1 ? "person has" : "people have"} the email.`
+              : `${replies.length} ${replies.length === 1 ? "reply" : "replies"} so far. ${asked} ${asked === 1 ? "person has" : "people have"} the email.`}
           </p>
           {replies.length > 0 ? (
-            <p className="mt-2 flex flex-wrap gap-x-4 font-mono text-[11px] tracking-wide text-mute">
-              {[5, 4, 3, 2, 1].map((score) => (
-                <span key={score}>
-                  {score} · {replies.filter((row) => row.score === score).length}
-                </span>
-              ))}
-            </p>
+            <p className="mt-1 text-sm leading-6 text-mute">{scoreSummary(replies)}</p>
           ) : null}
           {audience === 0 ? (
             <p className="mt-6 text-sm text-mute">
@@ -446,4 +441,14 @@ export default async function AdminEventPage({
       </div>
     </AppShell>
   );
+}
+
+function scoreSummary(replies: { score: number }[]): string {
+  const parts = [5, 4, 3, 2, 1].flatMap((score) => {
+    const count = replies.filter((row) => row.score === score).length;
+    if (count === 0) return [];
+    const people = count === 1 ? "person gave" : "people gave";
+    return [`${count} ${people} a ${score}`];
+  });
+  return `${parts.join(". ")}.`;
 }

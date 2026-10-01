@@ -35,7 +35,7 @@ export function FeedbackSendForm({
         </Button>
       ) : state?.ok ? null : (
         <p className="text-sm text-mute">
-          Everyone who can answer already has the link.
+          Everyone already has the link.
         </p>
       )}
     </form>
