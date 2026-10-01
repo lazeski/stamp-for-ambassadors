@@ -31,7 +31,7 @@ export function FeedbackForm({
         <legend className="text-[10px] uppercase tracking-[0.14em] text-mute select-none">
           Score
         </legend>
-        <p className="mt-2 text-xs leading-5 text-mute">1 is rough. 5 is the one.</p>
+        <p className="mt-2 text-xs leading-5 text-mute">1 is low. 5 is high.</p>
         <div className="mt-3 flex gap-2">
           {SCORES.map((value) => (
             <label key={value} className="cursor-pointer">
@@ -50,13 +50,12 @@ export function FeedbackForm({
           ))}
         </div>
       </fieldset>
-      <Field label="Note" hint="Optional. Whatever you want the organizers to know.">
+      <Field label="Note" hint="Optional.">
         <Textarea
           name="comment"
           rows={5}
           maxLength={2000}
           defaultValue={comment ?? ""}
-          placeholder="The room, the credits, the open mic."
         />
       </Field>
       {lockedReason ? (
