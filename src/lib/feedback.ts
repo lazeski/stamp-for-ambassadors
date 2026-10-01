@@ -2,7 +2,8 @@ import { createMagicLink, FEEDBACK_LINK_TTL_MS } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendFeedbackEmail } from "@/lib/mail";
 
-const SEND_BATCH = 8;
+const SEND_BATCH = 4;
+const BATCH_GAP_MS = 1_100;
 
 export const FEEDBACK_COMMENT_MAX = 2000;
 
@@ -84,6 +85,7 @@ export async function sendFeedbackAsks(event: {
   let sent = 0;
   let failed = 0;
   for (let index = 0; index < waiting.length; index += SEND_BATCH) {
+    const started = Date.now();
     const batch = waiting.slice(index, index + SEND_BATCH);
     const results = await Promise.allSettled(
       batch.map((attendee) => deliverAsk(event, attendee)),
@@ -95,6 +97,10 @@ export async function sendFeedbackAsks(event: {
         continue;
       }
       if (result.value === "sent") sent += 1;
+    }
+    const remaining = BATCH_GAP_MS - (Date.now() - started);
+    if (remaining > 0 && index + SEND_BATCH < waiting.length) {
+      await wait(remaining);
     }
   }
 
@@ -117,11 +123,21 @@ async function deliverAsk(
       `/e/${event.slug}/feedback`,
       FEEDBACK_LINK_TTL_MS,
     );
-    await sendFeedbackEmail({
-      email: attendee.email,
-      url,
-      eventName: event.name,
-    });
+    try {
+      await sendFeedbackEmail({
+        email: attendee.email,
+        url,
+        eventName: event.name,
+      });
+    } catch (error) {
+      if (!isRateLimit(error)) throw error;
+      await wait(BATCH_GAP_MS);
+      await sendFeedbackEmail({
+        email: attendee.email,
+        url,
+        eventName: event.name,
+      });
+    }
     return "sent";
   } catch (error) {
     await db.eventAttendee.updateMany({
@@ -130,4 +146,12 @@ async function deliverAsk(
     });
     throw error;
   }
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRateLimit(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("rate_limit_exceeded");
 }
