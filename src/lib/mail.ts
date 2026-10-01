@@ -225,6 +225,28 @@ export async function sendCreditsReadyEmail(input: {
   });
 }
 
+/**
+ * Sent when a host asks the room how the night went. Same shape as the
+ * credits note: one sentence and a link that already knows who they are.
+ */
+export async function sendFeedbackEmail(input: {
+  email: string;
+  url: string;
+  eventName: string;
+}) {
+  await send({
+    email: input.email,
+    subject: `How was ${input.eventName}?`,
+    logLabel: "Feedback",
+    cta: "Leave feedback",
+    lines: [
+      "How was the night? Open this link and tell us. No sign-in needed, it already knows it's you.",
+      "",
+      input.url,
+    ],
+  });
+}
+
 /** One message to the admin who pressed the button, so they can see mail arrive. */
 export async function sendTestEmail(email: string, url: string) {
   await send({
