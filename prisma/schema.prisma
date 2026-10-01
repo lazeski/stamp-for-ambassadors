@@ -90,6 +90,7 @@ model Event {
   projects  Project[]
   votes     Vote[]
   sponsors  Sponsor[]
+  feedback  Feedback[]
 }
 
 /// One row per Luma guest. Re-sync matches on lumaGuestId, not email.
@@ -114,12 +115,16 @@ model EventAttendee {
   /// Set once the "credits are ready" email went out. Separate from the
   /// assignment so a failed send retries on the next sync.
   notifiedAt        DateTime?
+  /// Set once the feedback ask went out. Cleared again if that send fails,
+  /// so the next press retries only the people who never got it.
+  feedbackAskedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  codes Code[]
-  votes Vote[]
+  codes    Code[]
+  votes    Vote[]
+  feedback Feedback?
 
   @@unique([eventId, lumaGuestId])
   @@index([eventId, email])
@@ -226,6 +231,27 @@ model Vote {
 
   @@unique([eventId, attendeeId])
   @@index([projectId])
+}
+
+/// One reply per guest. Sending the form is a separate step: this row exists
+/// only after they answer, and a second submit updates it.
+model Feedback {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  /// Unique because an attendee belongs to one event, and they get one reply.
+  attendeeId String        @unique
+  attendee   EventAttendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+
+  /// 1 is rough, 5 is the one.
+  score   Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
 }
 
 /// One row per caller per window, counted in the database rather than in
