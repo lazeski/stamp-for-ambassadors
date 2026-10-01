@@ -17,6 +17,7 @@ import { eventSnapshot, hasEnded, isFixtureEvent } from "@/lib/events";
 import { isAppointedHost, syncEventHostsFromLuma } from "@/lib/hosts";
 import { getLumaEvent, LumaError, resolveLumaEventId } from "@/lib/luma";
 import { publicOrigin } from "@/lib/app-url";
+import { sendFeedbackAsks } from "@/lib/feedback";
 import { maySendMail, sendTestEmail } from "@/lib/mail";
 import { partnersFor } from "@/lib/partners";
 import { deliverCredits, syncRosterNow } from "@/lib/roster";
@@ -789,6 +790,52 @@ export async function setVoting(
   });
   revalidateVoting(event.slug);
   return { ok: "Voting closed. Results are on this page and the attendees'." };
+}
+
+export async function sendFeedbackForm(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const slug = String(formData.get("eventSlug") ?? "");
+  const { organizer, event } = await requireEventManager(slug);
+  if (!maySendMail()) {
+    return {
+      error:
+        "Mail is not sent from here. On the live site this emails everyone who hasn't been asked yet.",
+    };
+  }
+
+  // The roster stops refreshing once the night is over, and a late scan is
+  // exactly the person this form is for. One pull, then send to that list.
+  const sync = await syncRosterNow(event);
+  const result = await sendFeedbackAsks(event);
+  await audit({
+    actorEmail: organizer.email,
+    action: "feedback.send",
+    eventSlug: event.slug,
+    detail: `sent ${result.sent}, failed ${result.failed}`,
+  });
+  revalidatePath(`/admin/e/${event.slug}`);
+
+  const stale = sync.error
+    ? " Luma didn't refresh, so this used the list we already had."
+    : "";
+  if (result.waiting === 0) {
+    return { ok: `Everyone who can answer already has the link.${stale}` };
+  }
+  if (result.sent === 0) {
+    return {
+      error: `None of the ${result.failed} ${result.failed === 1 ? "email" : "emails"} went out. Try again.`,
+    };
+  }
+  if (result.failed > 0) {
+    return {
+      ok: `Sent ${result.sent}. ${result.failed} didn't go out. Press again to retry those.${stale}`,
+    };
+  }
+  return {
+    ok: `Sent ${result.sent} ${result.sent === 1 ? "email" : "emails"}.${stale}`,
+  };
 }
 
 export async function sendSetupTestEmail(): Promise<ActionResult> {
