@@ -50,7 +50,7 @@ export function FeedbackForm({
           ))}
         </div>
       </fieldset>
-      <Field label="Note" hint="Optional.">
+      <Field label="Note" hint="Tell us what you liked, and what you didn't.">
         <Textarea
           name="comment"
           rows={5}
