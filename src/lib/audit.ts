@@ -17,6 +17,7 @@ export type AuditAction =
   | "howto.save"
   | "voting.open"
   | "voting.close"
+  | "feedback.send"
   | "host.invite"
   | "host.confirm"
   | "host.revoke";
