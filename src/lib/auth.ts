@@ -16,6 +16,12 @@ const SIGN_IN_TTL_MS = 20 * 60 * 1000;
  */
 export const EVENT_LINK_TTL_MS = 12 * 60 * 60 * 1000;
 
+/**
+ * A feedback ask is opened the next morning, sometimes the week after.
+ * Shorter than that and the link is dead by the time someone gets to it.
+ */
+export const FEEDBACK_LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
 export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -52,10 +58,10 @@ const REPLAY_GRACE_MS = 15 * 60 * 1000;
 /**
  * Nothing ever deleted these, so every link ever issued stayed on the table
  * with its hash and the path it was headed for. Cleared past the point any of
- * it can still be used: the longest-lived link is the twelve-hour one pushed
- * with a credits email, plus the replay window on top.
+ * it can still be used: the longest-lived link is the two-week one pushed
+ * with a feedback ask, plus the replay window on top.
  */
-const LINK_RETENTION_MS = EVENT_LINK_TTL_MS + REPLAY_GRACE_MS;
+const LINK_RETENTION_MS = FEEDBACK_LINK_TTL_MS + REPLAY_GRACE_MS;
 
 /**
  * Swept from `issueMagicLink` because it is the one write path a person
