@@ -79,26 +79,17 @@ export default async function EventDetailPage({
   const ended = hasEnded(event);
   const when = formatEventWhen(event.startAt, event.timezone);
   const projectCount = await db.project.count({ where: { eventId: event.id } });
-  const hasFacts = Boolean(when || event.location || event.lumaUrl);
 
   return (
     <AppShell hostDoor={!ended}>
       <div className="grid items-start gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,22rem)] lg:gap-20">
         <div>
-          {/*
-            Luma covers are usually square and carry the title and date as
-            artwork, so a full-width banner both crops the art and pushes the
-            form off the screen. Shown at its own shape instead, beside the
-            heading and detail list that already state the same facts.
-          */}
           <Plate
             src={eventCover(event)}
             alt=""
             eager
             className="mb-8 size-28 sm:size-32"
           />
-          {/* No kicker over the title: it held the location, which the band
-              below prints again under a label that says what it is. */}
           <PageIntro
             title={event.name}
             description={
@@ -108,11 +99,8 @@ export default async function EventDetailPage({
                 : "Verify your email, then get scanned at the door. Your partner credits unlock straight after.")
             }
           />
-          {/* One band closes the column instead of two stacked orphans: the
-              facts on the left, the only way off this page on the right, under
-              a rule that answers the one the card is hung from. */}
-          {hasFacts ? (
-            <div className="mt-12 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-line pt-6">
+          <div className="mt-12 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-line pt-6">
+            {when || event.location ? (
               <dl className="flex flex-wrap gap-x-10 gap-y-5">
                 {when ? (
                   <div>
@@ -129,28 +117,34 @@ export default async function EventDetailPage({
                   </div>
                 ) : null}
               </dl>
-              <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-                {projectCount > 0 ? (
-                  <Link
-                    href={`/e/${event.slug}/projects`}
-                    className="text-sm text-ink hover:opacity-60"
-                  >
-                    Project showcase →
-                  </Link>
-                ) : null}
-                {event.lumaUrl ? (
-                  <a
-                    href={event.lumaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-ink hover:opacity-60"
-                  >
-                    {ended ? "View on Luma ↗" : "Register on Luma ↗"}
-                  </a>
-                ) : null}
-              </div>
+            ) : null}
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+              <Link
+                href={`/e/${event.slug}/board`}
+                className="text-sm text-ink hover:opacity-60"
+              >
+                Check-in board →
+              </Link>
+              {projectCount > 0 ? (
+                <Link
+                  href={`/e/${event.slug}/projects`}
+                  className="text-sm text-ink hover:opacity-60"
+                >
+                  Project showcase →
+                </Link>
+              ) : null}
+              {event.lumaUrl ? (
+                <a
+                  href={event.lumaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-ink hover:opacity-60"
+                >
+                  {ended ? "View on Luma ↗" : "Register on Luma ↗"}
+                </a>
+              ) : null}
             </div>
-          ) : null}
+          </div>
         </div>
         <StampCard>
           {ended ? (
@@ -164,9 +158,7 @@ export default async function EventDetailPage({
               </p>
               {projectCount > 0 ? (
                 <Button asChild variant="primary" className="mt-6">
-                  <Link href={`/e/${event.slug}/projects`}>
-                    See the build
-                  </Link>
+                  <Link href={`/e/${event.slug}/projects`}>See the build</Link>
                 </Button>
               ) : null}
               <p className="mt-6 text-[13px] leading-6 text-mute">
