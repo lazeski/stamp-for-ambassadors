@@ -18,6 +18,8 @@ export type CatalogRow = {
   name: string;
   builders: string;
   description: string | null;
+  productUrl: string | null;
+  githubUrl: string | null;
   votes: number | null;
   place: number | null;
 };
@@ -42,6 +44,8 @@ export async function projectCatalog(
         name: project.name,
         builders: project.builders,
         description: project.description,
+        productUrl: project.productUrl,
+        githubUrl: project.githubUrl,
         votes: null,
         place: null,
       })),
@@ -57,6 +61,8 @@ export async function projectCatalog(
         name: project.name,
         builders: project.builders,
         description: project.description,
+        productUrl: project.productUrl,
+        githubUrl: project.githubUrl,
         votes: null,
         place: null,
       })),
@@ -70,6 +76,8 @@ export async function projectCatalog(
       name: project.name,
       builders: project.builders,
       description: project.description,
+      productUrl: project.productUrl,
+      githubUrl: project.githubUrl,
       votes,
       place,
     })),
