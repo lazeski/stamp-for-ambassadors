@@ -91,6 +91,7 @@ model Event {
   votes     Vote[]
   sponsors  Sponsor[]
   feedback  Feedback[]
+  teams     Team[]
 }
 
 /// One row per Luma guest. Re-sync matches on lumaGuestId, not email.
@@ -118,13 +119,17 @@ model EventAttendee {
   /// Set once the feedback ask went out. Cleared again if that send fails,
   /// so the next press retries only the people who never got it.
   feedbackAskedAt   DateTime?
+  /// Checked in and still looking for people to build with.
+  lookingForTeam    Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  codes    Code[]
-  votes    Vote[]
-  feedback Feedback?
+  codes     Code[]
+  votes     Vote[]
+  feedback  Feedback?
+  signup    Project?      @relation("ProjectSignup")
+  teammates TeamMember[]
 
   @@unique([eventId, lumaGuestId])
   @@index([eventId, email])
@@ -202,6 +207,13 @@ model Project {
   /// added without a number still lands after the ones before it.
   sortOrder Int @default(0)
 
+  productUrl String?
+  githubUrl  String?
+  /// Set when a checked-in guest signed this up. Null when a host typed it
+  /// in from the back of the room.
+  signedUpByAttendeeId String?        @unique
+  signedUpBy           EventAttendee? @relation("ProjectSignup", fields: [signedUpByAttendeeId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -231,6 +243,41 @@ model Vote {
 
   @@unique([eventId, attendeeId])
   @@index([projectId])
+}
+
+/// A group formed at the door. `open` means any checked-in person can join.
+model Team {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  name String
+  open Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members TeamMember[]
+
+  @@index([eventId])
+}
+
+/// One checked-in person, on one team, for one event.
+model TeamMember {
+  id     String @id @default(cuid())
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  eventId    String
+  attendeeId String
+  attendee   EventAttendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+
+  host Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, attendeeId])
+  @@index([teamId])
 }
 
 /// One reply per guest. Sending the form is a separate step: this row exists
