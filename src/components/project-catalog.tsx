@@ -36,6 +36,20 @@ export function ProjectCatalog({
               {project.description ? (
                 <p className="ballot-blurb">{project.description}</p>
               ) : null}
+              {project.productUrl || project.githubUrl ? (
+                <p className="mt-2 flex flex-wrap gap-x-4 text-sm text-mute">
+                  {project.productUrl ? (
+                    <a href={project.productUrl} className="hover:text-ink" target="_blank" rel="noopener noreferrer">
+                      Product ↗
+                    </a>
+                  ) : null}
+                  {project.githubUrl ? (
+                    <a href={project.githubUrl} className="hover:text-ink" target="_blank" rel="noopener noreferrer">
+                      GitHub ↗
+                    </a>
+                  ) : null}
+                </p>
+              ) : null}
             </div>
             {project.votes !== null ? (
               <div className="ballot-action">

@@ -68,12 +68,17 @@ export default async function EventProjectsPage({
   ]);
 
   const when = formatEventDay(event.startAt, event.timezone);
+  const winners = rows.filter((row) => row.place === 1);
   const description =
     rows.length === 0
       ? "Nothing has been written down yet. Projects appear here as they go up."
-      : closed
-        ? "What the room saw, in the order the votes settled."
-        : "What has been presented so far, in the order the room saw it.";
+      : closed && winners.length > 0
+        ? winners.length === 1
+          ? `${winners[0]?.name} won.`
+          : "A tie for first."
+        : closed
+          ? "What the room saw, in the order the votes settled."
+          : "What has been signed up and presented, in the order the room has them.";
 
   return (
     <AppShell
@@ -104,6 +109,39 @@ export default async function EventProjectsPage({
           description={description}
         />
       </div>
+
+      {closed && winners.length > 0 ? (
+        <section className="mt-10">
+          <p className="eyebrow">Winners</p>
+          <ul className="mt-4 border-t border-line">
+            {winners.map((project) => (
+              <li key={project.id} className="border-b border-line py-5">
+                <h2 className="font-display text-2xl tracking-heading">{project.name}</h2>
+                <p className="mt-1 text-sm text-mute">{project.builders}</p>
+                {project.votes !== null ? (
+                  <p className="mt-2 font-mono text-xs text-mute">
+                    {project.votes} {project.votes === 1 ? "vote" : "votes"}
+                  </p>
+                ) : null}
+                {project.productUrl || project.githubUrl ? (
+                  <p className="mt-3 flex flex-wrap gap-x-4 text-sm">
+                    {project.productUrl ? (
+                      <a href={project.productUrl} className="hover:opacity-60" target="_blank" rel="noopener noreferrer">
+                        Product ↗
+                      </a>
+                    ) : null}
+                    {project.githubUrl ? (
+                      <a href={project.githubUrl} className="hover:opacity-60" target="_blank" rel="noopener noreferrer">
+                        GitHub ↗
+                      </a>
+                    ) : null}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {rows.length > 0 ? (
         <ProjectCatalog rows={rows} closed={closed} />
