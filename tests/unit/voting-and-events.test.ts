@@ -32,9 +32,9 @@ describe("votingState", () => {
 
 describe("rankProjects", () => {
   const projects = [
-    { id: "a", name: "A", builders: "", description: null, sortOrder: 1 },
-    { id: "b", name: "B", builders: "", description: null, sortOrder: 2 },
-    { id: "c", name: "C", builders: "", description: null, sortOrder: 3 },
+    { id: "a", name: "A", builders: "", description: null, sortOrder: 1, productUrl: null, githubUrl: null },
+    { id: "b", name: "B", builders: "", description: null, sortOrder: 2, productUrl: null, githubUrl: null },
+    { id: "c", name: "C", builders: "", description: null, sortOrder: 3, productUrl: null, githubUrl: null },
   ];
 
   it("orders by votes, then by running order", () => {
