@@ -61,6 +61,8 @@ export type ProjectRow = {
   builders: string;
   description: string | null;
   sortOrder: number;
+  productUrl: string | null;
+  githubUrl: string | null;
 };
 
 const PROJECT_SELECT = {
@@ -69,6 +71,8 @@ const PROJECT_SELECT = {
   builders: true,
   description: true,
   sortOrder: true,
+  productUrl: true,
+  githubUrl: true,
 } as const;
 
 /** Running order: what the room saw, in the order they saw it. */
